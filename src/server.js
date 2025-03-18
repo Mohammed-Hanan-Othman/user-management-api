@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 // Initial default route
-app.get("/api/v1/users", userRouter);
+app.use("/api/v1/users", userRouter);
 app.get("/", (req, res) => {
     res.status(200).send("User Management API is running");
 });
