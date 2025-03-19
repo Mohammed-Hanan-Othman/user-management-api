@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const errorMiddleware = require("./middlewares/errorMiddleware");
 const TEN_MINUTES = 10 * 60 * 1000;
 
 const userRouter = require("./routes/authRouter");
@@ -38,10 +39,8 @@ app.get("/", (req, res) => {
 });
 
 // Error Handler
-app.use((err, req, res, next)=>{
-    console.log(err);
-    res.status(500).json({ message: "Internal server error"});
-})
+app.use(errorMiddleware);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>{
     console.log(`SERVER is running on port ${PORT}`);
