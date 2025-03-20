@@ -8,7 +8,7 @@ const errorMiddleware = require("./middlewares/errorMiddleware");
 const { PrismaClient } = require("@prisma/client");
 const TEN_MINUTES = 10 * 60 * 1000;
 
-const userRouter = require("./routes/authRouter");
+const userRouter = require("./routes/userRouter");
 
 const app = express();
 
