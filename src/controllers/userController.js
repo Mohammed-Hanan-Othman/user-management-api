@@ -1,4 +1,7 @@
+require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
+const DB_SALT = parseInt(process.env.DB_SALT);
 const prisma = new PrismaClient();
 
 const getUsers = async (req, res) => {
@@ -42,6 +45,16 @@ const getUsers = async (req, res) => {
 const createUser = async (req, res) => {
     try {
         // Create user
+        const {name, email, password} = req.body;
+        const hashedPassword = await bcrypt.hash(password,DB_SALT);
+        const newUser = await prisma.user.create({
+            data: {name, email, password: hashedPassword},
+            omit: {password: true}
+        });
+        return res.status(201).json({
+            message: "User created successfully",
+            data: newUser
+        });
     } catch (error) {
         console.log("Error creating user", error);
         return res.status(500).send("Internal Server Error");
@@ -49,5 +62,6 @@ const createUser = async (req, res) => {
 }
 
 module.exports = {
-    getUsers
+    getUsers,
+    createUser
 };
