@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const errorMiddleware = require("./middlewares/errorMiddleware");
+const { PrismaClient } = require("@prisma/client");
 const TEN_MINUTES = 10 * 60 * 1000;
 
 const userRouter = require("./routes/authRouter");
@@ -31,6 +32,18 @@ app.use(limiter);
 // Request parsers
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
+
+// Test db connection
+const prisma = new PrismaClient();
+async function testDB() {
+  try {
+    await prisma.$connect();
+    console.log("✅ Database connected successfully!");
+  } catch (error) {
+    console.error("❌ Database connection failed:", error);
+  }
+}
+testDB();
 
 //Routes
 app.use("/api/v1/users", userRouter);
