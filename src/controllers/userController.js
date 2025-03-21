@@ -6,20 +6,24 @@ const prisma = new PrismaClient();
 
 const getUsers = async (req, res) => {
     try {
-        let { page = 1, limit = 10} = req.query;
+        let { page = 1, limit = 10, email, name } = req.query;
         page = parseInt(page);
         limit = parseInt(limit);
-        console.log(page < 1 || limit < 1);
         if (page < 1 || limit < 1) {
             return res.status(400).json({ 
                 message: "Page and limit must be positive values"
             });
         }
+        // Set filters
+        let where = {};
+        if (email) where["email"] = { contains: email };
+        if (name) where["name"] = { contains: name };
         // Get all users
         const users = await prisma.user.findMany({
+            where,
             take : limit,
             skip : (page - 1) * limit,
-            orderBy: {createdAt : "desc"},
+            orderBy: {createdAt: "desc"},
             omit: { password: true }
         });
 
@@ -60,7 +64,6 @@ const createUser = async (req, res) => {
         return res.status(500).send("Internal Server Error");
     }
 }
-
 module.exports = {
     getUsers,
     createUser
