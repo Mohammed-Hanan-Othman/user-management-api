@@ -17,8 +17,8 @@ const getUsers = async (req, res) => {
         // Set filters
         let filters = search ? {
             OR: [
-                    { name : { contains: search} },
-                    { email : { contains: search} }
+                    { name : { contains: search, mode: "insensitive"} },
+                    { email : { contains: search, mode: "insensitive"} }
             ]
         }:{};
         if (email) filters["email"] = { contains: email };
