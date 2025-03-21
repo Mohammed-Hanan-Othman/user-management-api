@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 const getUsers = async (req, res) => {
     try {
-        let { page = 1, limit = 10, email, name, sortBy = "createdAt", order = "desc" } = req.query;
+        let { page = 1, limit = 10, email, name, sortBy = "createdAt", order = "desc", search } = req.query;
         page = parseInt(page);
         limit = parseInt(limit);
         if (page < 1 || limit < 1) {
@@ -15,7 +15,12 @@ const getUsers = async (req, res) => {
             });
         }
         // Set filters
-        let filters = {};
+        let filters = search ? {
+            OR: [
+                    { name : { contains: search} },
+                    { email : { contains: search} }
+            ]
+        }:{};
         if (email) filters["email"] = { contains: email };
         if (name) filters["name"] = { contains: name };
 
