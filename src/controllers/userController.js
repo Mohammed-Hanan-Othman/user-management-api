@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 const getUsers = async (req, res) => {
     try {
-        let { page = 1, limit = 10, email, name } = req.query;
+        let { page = 1, limit = 10, email, name, sortBy = "createdAt", order = "desc" } = req.query;
         page = parseInt(page);
         limit = parseInt(limit);
         if (page < 1 || limit < 1) {
@@ -18,17 +18,25 @@ const getUsers = async (req, res) => {
         let where = {};
         if (email) where["email"] = { contains: email };
         if (name) where["name"] = { contains: name };
+
+        // Validate order
+        const validOrder = ["asc", "desc"];
+        if (!validOrder.includes(order.toLowerCase())) {
+            return res.status(400).json({ 
+                message: "Invalid order value. Use 'asc' or 'desc'." 
+            });
+        }
         // Get all users
         const users = await prisma.user.findMany({
             where,
             take : limit,
             skip : (page - 1) * limit,
-            orderBy: {createdAt: "desc"},
+            orderBy: { [sortBy]: order.toLowerCase() },
             omit: { password: true }
         });
 
         // Generate metadata
-        const totalUsers = await prisma.user.count();
+        const totalUsers = await prisma.user.count({where});
         const totalPages = Math.ceil(totalUsers / limit);
         const metadata = {
             total_records : totalUsers,
