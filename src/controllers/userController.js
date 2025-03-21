@@ -15,9 +15,9 @@ const getUsers = async (req, res) => {
             });
         }
         // Set filters
-        let where = {};
-        if (email) where["email"] = { contains: email };
-        if (name) where["name"] = { contains: name };
+        let filters = {};
+        if (email) filters["email"] = { contains: email };
+        if (name) filters["name"] = { contains: name };
 
         // Validate order
         const validOrder = ["asc", "desc"];
@@ -26,17 +26,26 @@ const getUsers = async (req, res) => {
                 message: "Invalid order value. Use 'asc' or 'desc'." 
             });
         }
+        // Create sort order
+        let orderBy = [];
+        if (Array.isArray(sortBy)){
+            sortBy.forEach((item) =>{
+                orderBy.push({ [item] : order.toLowerCase() });
+            });
+        } else {
+            orderBy = { [sortBy] : order.toLowerCase() }
+        }
         // Get all users
         const users = await prisma.user.findMany({
-            where,
+            where: filters,
             take : limit,
             skip : (page - 1) * limit,
-            orderBy: { [sortBy]: order.toLowerCase() },
+            orderBy,
             omit: { password: true }
         });
 
         // Generate metadata
-        const totalUsers = await prisma.user.count({where});
+        const totalUsers = await prisma.user.count({ where : filters });
         const totalPages = Math.ceil(totalUsers / limit);
         const metadata = {
             total_records : totalUsers,
