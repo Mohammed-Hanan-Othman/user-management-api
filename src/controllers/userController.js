@@ -3,6 +3,8 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const DB_SALT = parseInt(process.env.DB_SALT);
 const prisma = new PrismaClient();
+const {getAllUsers, getUserCount, createNewUser} = require("../services/userService");
+
 
 const getUsers = async (req, res) => {
     try {
@@ -23,6 +25,7 @@ const getUsers = async (req, res) => {
         }:{};
         if (email) filters["email"] = { contains: email };
         if (name) filters["name"] = { contains: name };
+        if (filters.OR.length === 0) delete filters.OR;
 
         // Validate order
         const validOrder = ["asc", "desc"];
@@ -34,23 +37,18 @@ const getUsers = async (req, res) => {
         // Create sort order
         let orderBy = [];
         if (Array.isArray(sortBy)){
-            sortBy.forEach((item) =>{
-                orderBy.push({ [item] : order.toLowerCase() });
-            });
+            orderBy = sortBy.map(item => ({ [item]: order.toLowerCase() }));
         } else {
-            orderBy = { [sortBy] : order.toLowerCase() }
+            orderBy = [{ [sortBy] : order.toLowerCase() }]
+        }
+        const options = {
+            page, limit, orderBy
         }
         // Get all users
-        const users = await prisma.user.findMany({
-            where: filters,
-            take : limit,
-            skip : (page - 1) * limit,
-            orderBy,
-            omit: { password: true }
-        });
+        const users = await getAllUsers(filters, options);
 
         // Generate metadata
-        const totalUsers = await prisma.user.count({ where : filters });
+        const totalUsers = await getUserCount(filters);
         const totalPages = Math.ceil(totalUsers / limit);
         const metadata = {
             total_records : totalUsers,
@@ -58,14 +56,16 @@ const getUsers = async (req, res) => {
             current_page: page,
             limit,
         };
-        res.status(200).json({
+        return res.status(200).json({
             message: "Fetched users successfully",
             metadata,
             data: users
         });
     } catch (error) {
         console.log("Error fetching users", error);
-        return res.status(500).send("Internal Server Error");
+        return res.status(200).json({
+            message: "Internal server error",
+        })
     }
 }
 const createUser = async (req, res) => {
@@ -73,10 +73,10 @@ const createUser = async (req, res) => {
         // Create user
         const {name, email, password} = req.body;
         const hashedPassword = await bcrypt.hash(password,DB_SALT);
-        const newUser = await prisma.user.create({
-            data: {name, email, password: hashedPassword},
-            omit: {password: true}
-        });
+        const data = {name, email, password: hashedPassword}
+        
+        const newUser = await createNewUser(data);
+
         return res.status(201).json({
             message: "User created successfully",
             data: newUser
