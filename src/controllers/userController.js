@@ -1,8 +1,6 @@
 require("dotenv").config();
-const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const DB_SALT = parseInt(process.env.DB_SALT);
-const prisma = new PrismaClient();
 const {getAllUsers, getUserCount, createNewUser, getUserByEmail} = require("../services/userService");
 
 
@@ -62,10 +60,8 @@ const getUsers = async (req, res) => {
             data: users
         });
     } catch (error) {
-        console.log("Error fetching users", error);
-        return res.status(200).json({
-            message: "Internal server error",
-        })
+        console.error("Error fetching users:", error.message || error);
+        return res.status(500).send("Internal Server Error");
     }
 }
 const createUser = async (req, res) => {
