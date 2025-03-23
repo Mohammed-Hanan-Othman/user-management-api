@@ -3,7 +3,7 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const DB_SALT = parseInt(process.env.DB_SALT);
 const prisma = new PrismaClient();
-const {getAllUsers, getUserCount, createNewUser} = require("../services/userService");
+const {getAllUsers, getUserCount, createNewUser, getUserByEmail} = require("../services/userService");
 
 
 const getUsers = async (req, res) => {
@@ -70,11 +70,24 @@ const getUsers = async (req, res) => {
 }
 const createUser = async (req, res) => {
     try {
-        // Create user
-        const {name, email, password} = req.body;
-        const hashedPassword = await bcrypt.hash(password,DB_SALT);
+        // Obtain data from fields
+        let { name, email, password } = req.body;
+        name = name.trim();
+        email = email.trim().toLowerCase();
+
+        // Check if email is already in use.
+        const user = await getUserByEmail(email);
+        if (user) {
+            return res.status(400).json({
+                message: "Error. Email already in use."
+            });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, DB_SALT);
         const data = {name, email, password: hashedPassword}
         
+        // Save new user
         const newUser = await createNewUser(data);
 
         return res.status(201).json({
@@ -82,7 +95,7 @@ const createUser = async (req, res) => {
             data: newUser
         });
     } catch (error) {
-        console.log("Error creating user", error);
+        console.error("Error creating user:", error.message || error);
         return res.status(500).send("Internal Server Error");
     }
 }

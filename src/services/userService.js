@@ -10,7 +10,12 @@ const getAllUsers = async (filters, options) =>{
         omit: { password: true }
     });
 }
-
+const getUserByEmail = async (email) => {
+    return await prisma.user.findMany({
+        where: { email },
+        omit: { password: true }
+    });
+}
 const getUserCount = async (filters) =>{
     return await prisma.user.count({ where : filters });
 }
@@ -21,5 +26,6 @@ const createNewUser = async (data) => {
 module.exports = {
     getAllUsers,
     getUserCount,
+    getUserByEmail,
     createNewUser
 }
