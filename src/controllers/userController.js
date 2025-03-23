@@ -61,7 +61,7 @@ const getUsers = async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching users:", error.message || error);
-        return res.status(500).send("Internal Server Error");
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 }
 const createUser = async (req, res) => {
@@ -92,7 +92,7 @@ const createUser = async (req, res) => {
         });
     } catch (error) {
         console.error("Error creating user:", error.message || error);
-        return res.status(500).send("Internal Server Error");
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 }
 module.exports = {
