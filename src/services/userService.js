@@ -10,12 +10,14 @@ const getAllUsers = async (filters, options) =>{
         omit: { password: true }
     });
 }
-const getUserByEmail = async (email) => {
-    return await prisma.user.findUnique({
+const getUserByEmail = async (email, hidePassword = true) => {
+    const options = {
         where: { email },
-        omit: { password: true }
-    });
-}
+        omit: hidePassword ? { password: true} : undefined
+    };
+
+    return await prisma.user.findUnique(options);
+};
 const getUserCount = async (filters) =>{
     return await prisma.user.count({ where : filters });
 }
