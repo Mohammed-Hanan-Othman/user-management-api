@@ -11,7 +11,7 @@ const getAllUsers = async (filters, options) =>{
     });
 }
 const getUserByEmail = async (email) => {
-    return await prisma.user.findMany({
+    return await prisma.user.findUnique({
         where: { email },
         omit: { password: true }
     });
