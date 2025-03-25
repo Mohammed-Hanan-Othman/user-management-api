@@ -35,6 +35,12 @@ const updateExistingUser = async (data, id, hidePassword = true) =>{
         omit: hidePassword? { password: true } : undefined
     });
 }
+const deleteUserById = async (id, hidePassword = true) => {
+    return await prisma.user.delete({
+        where: { id },
+        omit: hidePassword? { password: true } : undefined
+    });
+}
 module.exports = {
     getAllUsers,
     getUserCount,
