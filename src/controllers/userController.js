@@ -1,7 +1,7 @@
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const DB_SALT = parseInt(process.env.DB_SALT);
-const {getAllUsers, getUserCount, createNewUser, getUserByEmail} = require("../services/userService");
+const { getAllUsers, getUserCount, createNewUser, getUserByEmail, updateExistingUser, getUserById } = require("../services/userService");
 
 
 const getUsers = async (req, res) => {
@@ -95,7 +95,35 @@ const createUser = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+const updateUser = async (req, res) => {
+    try {
+        // obtain id, name and email
+        const id = req.params.id;
+        let { name, email } = req.body;
+        // ensure user exists
+        const user = await getUserById(id);
+        if (!user) {
+            return res.status(400).json({ message: "No users found" });
+        }
+        if (req.user.id !== id) {
+            return res.status(401).json({ 
+                message: "Only the logged in user can edit account information" 
+            });
+        }
+        // perform update
+        const data = { name, email };
+        const updatedUser = await updateExistingUser(data, id);
+        return res.status(200).json({ 
+            message: "User updated successfully",
+            data: updatedUser
+        });
+    } catch (error) {
+        console.error("Error creating user:", error.message || error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
 module.exports = {
     getUsers,
-    createUser
+    createUser,
+    updateUser
 };
