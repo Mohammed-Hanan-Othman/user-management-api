@@ -13,7 +13,12 @@ const validateUpdateUser = [
     check("email").notEmpty().trim().withMessage("Email cannot be empty")
         .isEmail().withMessage("Email is invalid")
 ];
+const validateUserId = [
+    check("id").trim().notEmpty().withMessage("User id must be provided")
+        .isUUID().withMessage("User id not provided or invalid")
+]
 module.exports = {
+    validateUserId,
     validatePostUser,
     validateUpdateUser
 };

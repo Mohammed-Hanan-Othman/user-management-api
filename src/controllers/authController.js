@@ -23,6 +23,7 @@ const postLogin = async (req, res) => {
             id: user.id,
             name: user.name,
             email: user.email,
+            role: user.role,
         };
         const token = jwt.sign(userData, JWT_SECRET, {expiresIn: "1hr"});
         return res.status(200).json({

@@ -1,7 +1,7 @@
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const DB_SALT = parseInt(process.env.DB_SALT);
-const { getAllUsers, getUserCount, createNewUser, getUserByEmail, updateExistingUser, getUserById } = require("../services/userService");
+const { getAllUsers, getUserCount, createNewUser, getUserByEmail, updateExistingUser, getUserById, deleteUserById } = require("../services/userService");
 
 
 const getUsers = async (req, res) => {
@@ -122,8 +122,39 @@ const updateUser = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+const deleteUser = async (req, res) => {
+    try {
+        // obtain user id
+        const userId = req.params.id;
+        // find associated user
+        const user = await getUserById(userId);
+        if (!user) {
+            return res.status(400).json({
+                message: "No associated user found"
+            });
+        }
+        // ensure logged in user is admin
+        const currentUser = req.user;
+        if (currentUser.role.toLowerCase() !== "admin") {
+            return res.status(401).json({
+                message: "Deletion unauthorized. Only admins can delete users"
+            });
+        }
+        // perform deletion
+        const deletedUser = await deleteUserById(userId);
+        // send response
+        return res.status(200).json({ 
+            message: "User deleted successfully",
+            data: deletedUser
+        });    
+    } catch (error) {
+        console.error("Error creating user:", error.message || error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
 module.exports = {
     getUsers,
     createUser,
-    updateUser
+    updateUser,
+    deleteUser
 };
