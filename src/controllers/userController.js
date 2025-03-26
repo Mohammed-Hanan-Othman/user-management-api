@@ -6,7 +6,7 @@ const { getAllUsers, getUserCount, createNewUser, getUserByEmail, updateExisting
 
 const getUsers = async (req, res) => {
     try {
-        let { page = 1, limit = 10, email, name, sortBy = "createdAt", order = "desc", search } = req.query;
+        let { page = 1, limit = 10, email, name, sortBy = "createdAt", order = "desc", search=" " } = req.query;
         page = parseInt(page);
         limit = parseInt(limit);
         if (page < 1 || limit < 1) {
@@ -67,7 +67,7 @@ const getUsers = async (req, res) => {
 const createUser = async (req, res) => {
     try {
         // Obtain data from fields
-        let { name, email, password } = req.body;
+        let { name, email, password, role } = req.body;
         name = name.trim();
         email = email.trim().toLowerCase();
 
@@ -81,7 +81,7 @@ const createUser = async (req, res) => {
 
         // Hash password
         const hashedPassword = await bcrypt.hash(password, DB_SALT);
-        const data = {name, email, password: hashedPassword}
+        const data = {name, email, password: hashedPassword, role}
         
         // Save new user
         const newUser = await createNewUser(data);
