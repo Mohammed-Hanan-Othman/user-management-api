@@ -6,7 +6,7 @@ const { protectRoute } = require("../middlewares/protectRoute");
 
 const userRouter = express.Router();
 
-userRouter.get("/", getUsers);
+userRouter.get("/", protectRoute, getUsers);
 userRouter.post("/", validatePostUser, handleValidationErrors, createUser);
 userRouter.put("/:id", protectRoute, validateUpdateUser, handleValidationErrors, updateUser);
 userRouter.delete("/:id", protectRoute, validateUserId, handleValidationErrors, deleteUser);

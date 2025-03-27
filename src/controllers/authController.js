@@ -1,7 +1,7 @@
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { getUserByEmail } = require("../services/userService");
+const { getUserByEmail, getUserById } = require("../services/userService");
 const JWT_SECRET = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
@@ -27,8 +27,8 @@ const postLogin = async (req, res) => {
             email: user.email,
             role: user.role,
         };
-        const accessToken = jwt.sign(userData, JWT_SECRET, {expiresIn: "1hr"});
-        const refreshToken = jwt.sign(userData, REFRESH_SECRET, {expiresIn: "7d"});
+        const accessToken = jwt.sign(userData, JWT_SECRET, {expiresIn: "1min"});
+        const refreshToken = jwt.sign(userData, REFRESH_SECRET, {expiresIn: "5min"});
         
         // Set refresh token as cookie
         res.cookie("refreshToken", refreshToken, {
@@ -45,7 +45,32 @@ const postLogin = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
+const postRefresh = async (req, res) => {
+    try {
+        // Obtain refresh token
+        const refreshToken = req.cookies?.refreshToken;
+        if (!refreshToken) {
+            return res.status(400).json({ message: "No refresh token provided"});
+        }
 
+        // verify refresh token
+        const userData = jwt.verify(refreshToken, REFRESH_SECRET);
+
+        // Fetch user to ensure they still exist
+        const user = await getUserById(userData.id);
+        if (!user) {
+            return res.status(403).json({ message: "User no longer exists" });
+        }
+        const {id, name, email, role} = userData;
+        // Generate new access token
+        const accessToken = jwt.sign({id, name, email, role}, JWT_SECRET, {expiresIn: "1min"});
+        return res.status(200).json({ message: "Token refreshed successfully", accessToken });
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
 module.exports = {
     postLogin,
+    postRefresh
 };
