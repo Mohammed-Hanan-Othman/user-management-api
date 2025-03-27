@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 const { PrismaClient } = require("@prisma/client");
 const TEN_MINUTES = 10 * 60 * 1000;
@@ -32,6 +33,9 @@ app.use(limiter);
 // Request parsers
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
+
+// Handle cookies
+app.use(cookieParser());
 
 // Test db connection
 const prisma = new PrismaClient();

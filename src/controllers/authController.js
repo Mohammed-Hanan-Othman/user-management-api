@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { getUserByEmail } = require("../services/userService");
 const JWT_SECRET = process.env.JWT_SECRET;
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
 const postLogin = async (req, res) => {
     try {
@@ -25,12 +27,19 @@ const postLogin = async (req, res) => {
             email: user.email,
             role: user.role,
         };
-        const token = jwt.sign(userData, JWT_SECRET, {expiresIn: "1hr"});
+        const accessToken = jwt.sign(userData, JWT_SECRET, {expiresIn: "1hr"});
+        const refreshToken = jwt.sign(userData, REFRESH_SECRET, {expiresIn: "7d"});
+        
+        // Set refresh token as cookie
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            maxAge: SEVEN_DAYS,
+            sameSite: "Strict"
+        });
         return res.status(200).json({
             message: "Login successful",
-            data: { ...userData, token }
+            data: { ...userData, accessToken }
         });
-
     } catch (error) {
         console.error("Error logging in:", error);
         return res.status(500).json({ message: "Internal Server Error" });
