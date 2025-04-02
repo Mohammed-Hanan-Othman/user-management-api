@@ -14,11 +14,9 @@ const postLogin = async (req, res) => {
         // Validate email & password input.
         let { email, password } = req.body;
         email = email.trim().toLowerCase();
-        console.log({ email, password });
         
         // Check if the user exists.
         const user = await getUserByEmail(email, false);
-        console.log(user);
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
