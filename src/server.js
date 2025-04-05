@@ -7,10 +7,11 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 const { PrismaClient } = require("@prisma/client");
-const TEN_MINUTES = 10 * 60 * 1000;
-
 const userRouter = require("./routes/userRouter");
 const authRouter = require("./routes/authRouter");
+const blogRouter = require("./routes/blogRouter");
+const TEN_MINUTES = 10 * 60 * 1000;
+
 const app = express();
 
 // Security headers
@@ -52,6 +53,7 @@ testDB();
 //Routes
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/blogs", blogRouter);
 app.get("/", (req, res) => {
     res.status(200).send("User Management API is running");
 });
