@@ -1,7 +1,7 @@
 const express = require("express");
 const { validateLogin } = require("../middlewares/validators/authValidator");
 const { handleValidationErrors } = require("../middlewares/handleValidationErrors");
-const { postLogin, postRefresh } = require("../controllers/authController");
+const { postLogin, postRefresh, postLogout } = require("../controllers/authController");
 const router = express.Router();
 
 router.get("/", (req, res) =>{
@@ -9,5 +9,6 @@ router.get("/", (req, res) =>{
 });
 router.post("/login", validateLogin, handleValidationErrors, postLogin);
 router.post("/refresh", postRefresh);
+router.post("/logout", postLogout);
 
 module.exports = router;

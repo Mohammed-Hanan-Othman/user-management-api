@@ -36,6 +36,7 @@ const postLogin = async (req, res) => {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             maxAge: SEVEN_DAYS,
+            path: "/",
             sameSite: "Strict"
         });
         return res.status(200).json({
@@ -89,6 +90,7 @@ const postRefresh = async (req, res) => {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             maxAge: SEVEN_DAYS,
+            path: "/",
             sameSite: "Strict"
         });
         return res.status(200).json({ message: "Token refreshed successfully", accessToken });
@@ -96,8 +98,28 @@ const postRefresh = async (req, res) => {
         console.error("Error refreshing token:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
+const postLogout = async (req, res) =>{
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            return res.status(400).json({ message: "User not already logged in." });
+        }
+        // Clear refresh cookie
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            path: "/",
+            sameSite: "Strict"
+        });
+        
+        return res.sendStatus(204);
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
 module.exports = {
     postLogin,
-    postRefresh
+    postRefresh,
+    postLogout
 };
