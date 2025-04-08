@@ -15,6 +15,12 @@ const validatePostBlog = [
         }).escape(),
 ];
 
+const validateBlogId = [
+    check("id").trim().notEmpty().withMessage("Blog id cannot be empty")
+        .isUUID().withMessage("Blog id not provided or invalid")
+];
+
 module.exports = {
-    validatePostBlog
+    validatePostBlog,
+    validateBlogId
 }
