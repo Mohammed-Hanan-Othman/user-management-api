@@ -1,4 +1,4 @@
-const { createBlog, getAllBlogs, getBlogsCount } = require("../services/blogService");
+const { createBlog, getAllBlogs, getBlogsCount, getBlogById } = require("../services/blogService");
 const { getUserById } = require("../services/userService");
 
 const postBlog = async (req, res) => {
@@ -83,8 +83,23 @@ const getBlogs = async (req, res) =>{
         console.error("Error fetching blogs:", error.message || error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
+};
+const getBlogDetails = async (req, res) =>{
+    try {
+        // get a single blog.
+        const { id } = req.params;
+        const blog = await getBlogById(id);
+        return res.status(200).json({
+            message: "Fetched blog details successfully",
+            data: blog
+        });
+    } catch (error) {
+        console.error("Error fetching blog details:", error.message || error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
 }
 module.exports = {
     postBlog,
-    getBlogs
+    getBlogs,
+    getBlogDetails
 }
