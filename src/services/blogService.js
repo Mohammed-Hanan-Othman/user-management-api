@@ -30,9 +30,15 @@ const getBlogById = async (id) =>{
         }
     });
 }
+const deleteBlogById = async (id) =>{
+    return await prisma.blog.delete({
+        where: { id }
+    });
+}
 module.exports = {
     getBlogsCount,
     createBlog,
     getAllBlogs,
-    getBlogById
+    getBlogById,
+    deleteBlogById
 };
