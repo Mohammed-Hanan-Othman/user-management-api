@@ -1,4 +1,4 @@
-const { createBlog, getAllBlogs, getBlogsCount, getBlogById } = require("../services/blogService");
+const { createBlog, getAllBlogs, getBlogsCount, getBlogById, deleteBlogById } = require("../services/blogService");
 const { getUserById } = require("../services/userService");
 
 const postBlog = async (req, res) => {
@@ -97,9 +97,36 @@ const getBlogDetails = async (req, res) =>{
         console.error("Error fetching blog details:", error.message || error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
+const deleteBlog = async (req, res) =>{
+    try {
+        // obtain user info and blog id
+        const { id } = req.params;
+        const userId = req.user.id;
+        
+        // check if user is admin
+        if (req.user.role !== "admin") {
+            return res.status(401).json({ message: "Only admins can delete blogs"});
+        }
+        // check if blog exist 
+        const blog = await getBlogById(id);
+        if (!blog) {
+            return res.status(404).json({ 
+                message: "No associated blogs found. Ensure blog id is correct"
+            });
+        }
+        // delete the blog
+        const deletedBlog = await deleteBlogById (id);
+        // send a response
+        return res.status(200).json({ message: "Blog deleted successfully", data: deletedBlog});
+    } catch (error) {
+        console.error("Error fetching blog details:", error.message || error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
 module.exports = {
     postBlog,
     getBlogs,
-    getBlogDetails
-}
+    getBlogDetails,
+    deleteBlog
+};

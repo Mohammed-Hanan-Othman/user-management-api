@@ -32,7 +32,10 @@ const getBlogById = async (id) =>{
 }
 const deleteBlogById = async (id) =>{
     return await prisma.blog.delete({
-        where: { id }
+        where: { id },
+        include : {
+            user :  { omit : { id: true, password: true, createdAt: true, updatedAt: true } }
+        }
     });
 }
 module.exports = {
