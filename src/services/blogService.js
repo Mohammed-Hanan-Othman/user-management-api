@@ -22,9 +22,17 @@ const getAllBlogs = async (filters, options) => {
         orderBy,
     });
 };
-
+const getBlogById = async (id) =>{
+    return await prisma.blog.findUnique({
+        where: { id },
+        include : {
+            user :  { omit : { id: true, password: true, createdAt: true, updatedAt: true } }
+        }
+    });
+}
 module.exports = {
     getBlogsCount,
     createBlog,
     getAllBlogs,
+    getBlogById
 };
