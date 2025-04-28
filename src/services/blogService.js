@@ -26,7 +26,7 @@ const getBlogById = async (id) =>{
     return await prisma.blog.findUnique({
         where: { id },
         include : {
-            user :  { omit : { id: true, password: true, createdAt: true, updatedAt: true } }
+            user :  { omit : { password: true, createdAt: true, updatedAt: true } }
         }
     });
 }
@@ -37,11 +37,21 @@ const deleteBlogById = async (id) =>{
             user :  { omit : { id: true, password: true, createdAt: true, updatedAt: true } }
         }
     });
-}
+};
+const updateSingleBlog = async (data, id) =>{
+    return await prisma.blog.update({
+        where: { id }, 
+        data,
+        include : {
+            user :  { omit : { id: true, password: true, createdAt: true, updatedAt: true } }
+        }
+    });
+};
 module.exports = {
     getBlogsCount,
     createBlog,
     getAllBlogs,
     getBlogById,
-    deleteBlogById
+    deleteBlogById,
+    updateSingleBlog
 };

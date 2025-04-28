@@ -1,7 +1,7 @@
-const { createBlog, getAllBlogs, getBlogsCount, getBlogById, deleteBlogById } = require("../services/blogService");
+const { createBlog, getAllBlogs, getBlogsCount, getBlogById, deleteBlogById, updateSingleBlog } = require("../services/blogService");
 const { getUserById } = require("../services/userService");
 
-const postBlog = async (req, res) => {
+const postBlog = async (req, res) =>{
     try {
         const userId = req.user.id;
         const { title, content } = req.body;
@@ -115,12 +115,48 @@ const deleteBlog = async (req, res) =>{
                 message: "No associated blogs found. Ensure blog id is correct"
             });
         }
+        if (userId != blog.user.id ) {
+            return res.status(401).json({ 
+                message: "Only the creator of this blog can delete it."
+            });
+        }
         // delete the blog
-        const deletedBlog = await deleteBlogById (id);
+        const deletedBlog = await deleteBlogById(id);
         // send a response
         return res.status(200).json({ message: "Blog deleted successfully", data: deletedBlog});
     } catch (error) {
-        console.error("Error fetching blog details:", error.message || error);
+        console.error("Error deleting blog:", error.message || error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+const updateBlog = async (req, res) =>{
+    try {
+        // obtain the blog id and user id
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        // obtain the update information
+        const { title, content } = req.body;
+        console.log({id, userId, title, content});
+
+        // check if blog exist and if user is the creator of the blog
+        const blog = await getBlogById(id);
+        if (!blog) {
+            return res.status(404).json({ 
+                message: "No associated blogs found."
+            });
+        }
+        if (blog.user.id !== userId) {
+            return res.json({ message: "Only blog creator can update this blog"});
+        }
+
+        // update the blog
+        const updatedBlog = await updateSingleBlog( { title, content }, id);
+        
+        // send response
+        return res.status(200).json({ message: "Blog updated successfully", data: updatedBlog});
+    } catch (error) {
+        console.error("Error updating blog:", error.message || error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -128,5 +164,6 @@ module.exports = {
     postBlog,
     getBlogs,
     getBlogDetails,
-    deleteBlog
+    deleteBlog,
+    updateBlog
 };
